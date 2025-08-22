@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { TOTP, Secret } from 'otpauth';
+import AddAccountModal from './components/AddAccountModal.vue';
 
 // Using a dictionary-like object for accounts
 // Key: account name (string)
@@ -12,10 +13,10 @@ interface TotpAccounts {
 }
 
 const accounts = ref<TotpAccounts>({});
-const newAccountName = ref('');
-const newAccountSecret = ref('');
 const currentTokens = ref<{ [key: string]: string }>({});
 const remainingTimes = ref<{ [key: string]: number }>({});
+const isModalOpen = ref(false);
+const copiedName = ref<string | null>(null);
 let intervalId: number | undefined;
 
 const loadAccounts = async () => {
@@ -38,15 +39,7 @@ const saveAccounts = async () => {
   }
 };
 
-const addAccount = async () => {
-  const name = newAccountName.value.trim();
-  const secret = newAccountSecret.value.trim();
-
-  if (!name || !secret) {
-    alert('Name and Secret cannot be empty.');
-    return;
-  }
-  // Check for duplicates using object key existence
+const handleAccountAdded = async ({ name, secret }: { name: string; secret: string }) => {
   if (accounts.value[name]) {
     alert('Account with this name already exists.');
     return;
@@ -56,8 +49,7 @@ const addAccount = async () => {
   accounts.value[name] = { secret };
   await saveAccounts();
   updateAllTokens();
-  newAccountName.value = '';
-  newAccountSecret.value = '';
+  isModalOpen.value = false;
 };
 
 const deleteAccount = async (name: string) => {
@@ -90,11 +82,14 @@ const updateAllTokens = () => {
   }
 };
 
-const copyToClipboard = async (text: string) => {
+const copyToClipboard = async (name: string, text: string) => {
   if (!text || text === 'Error') return;
   try {
     await navigator.clipboard.writeText(text);
-    alert('Copied to clipboard!');
+    copiedName.value = name;
+    setTimeout(() => {
+      copiedName.value = null;
+    }, 2000);
   } catch (err) {
     console.error('Failed to copy: ', err);
     alert('Failed to copy to clipboard.');
@@ -114,31 +109,45 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-80 bg-gray-100 p-4 font-sans">
-    <h1 class="text-center text-2xl font-bold text-gray-800 mb-4">TOTP Authenticator</h1>
+  <div class="w-80 bg-slate-800 p-4 font-sans text-white">
+    <h1 class="text-center text-xl font-bold text-slate-200 mb-4">TOTP Authenticator</h1>
 
-    <div class="bg-white p-4 rounded-lg shadow-md mb-4">
-      <h2 class="text-lg font-semibold text-gray-700 mb-2">Add New Account</h2>
-      <input v-model="newAccountName" placeholder="Account Name" class="w-full px-3 py-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      <input v-model="newAccountSecret" placeholder="Secret Key (Base32)" class="w-full px-3 py-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      <button @click="addAccount" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Add Account</button>
+    <div class="mb-4">
+      <button @click="isModalOpen = true" class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-colors">
+        Add New Account
+      </button>
     </div>
 
-    <div class="space-y-2">
-      <h2 class="text-lg font-semibold text-gray-700 mb-2">Your Accounts</h2>
-      <p v-if="Object.keys(accounts).length === 0" class="text-gray-500">No accounts added yet.</p>
-      <div v-for="(_, name) in accounts" :key="name" class="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
+    <AddAccountModal v-if="isModalOpen" @add-account="handleAccountAdded" @close="isModalOpen = false" />
+
+    <div class="space-y-3">
+      <h2 class="text-base font-semibold text-slate-400 mb-2">Your Accounts</h2>
+      <p v-if="Object.keys(accounts).length === 0" class="text-slate-400 text-center py-4">No accounts added yet.</p>
+      <div v-for="(_, name) in accounts" :key="name" class="bg-slate-700 p-3 rounded-lg shadow-md flex justify-between items-center">
         <div class="flex-grow">
-          <h3 class="text-xl font-semibold text-gray-800">{{ name }}</h3>
-          <div class="flex items-center gap-2 mt-1">
-            <span class="text-2xl font-mono text-blue-600 tracking-widest">{{ currentTokens[String(name)] || '...' }}</span>
-            <progress :value="remainingTimes[String(name)]" max="30" class="w-full h-2 rounded-full overflow-hidden"></progress>
-            <span class="text-sm text-gray-500">{{ remainingTimes[String(name)] }}s</span>
+          <h3 class="text-base font-medium text-slate-200 text-left">{{ name }}</h3>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="text-2xl font-mono text-indigo-400 tracking-wider">{{ currentTokens[String(name)] || '...' }}</span>
+            <progress :value="remainingTimes[String(name)]" max="30" class="w-full h-1.5 rounded-full overflow-hidden"></progress>
+            <span class="text-xs text-slate-400 w-8 text-right">{{ remainingTimes[String(name)] }}s</span>
           </div>
         </div>
-        <div class="flex flex-col gap-2 ml-4">
-          <button @click="copyToClipboard(currentTokens[String(name)])" :disabled="!currentTokens[String(name)] || currentTokens[String(name)] === 'Error'" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">Copy</button>
-          <button @click="deleteAccount(String(name))" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">Delete</button>
+        <div class="flex items-center gap-1 ml-3">
+          <div class="relative">
+            <button @click="copyToClipboard(String(name), currentTokens[String(name)])" :disabled="!currentTokens[String(name)] || currentTokens[String(name)] === 'Error'" class="p-1 text-slate-400 rounded-full hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </button>
+            <span v-if="copiedName === name" class="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded-md px-2 py-1">
+              Copied!
+            </span>
+          </div>
+          <button @click="deleteAccount(String(name))" class="p-1 text-red-500 rounded-full hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-red-400 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -148,17 +157,15 @@ onUnmounted(() => {
 <style>
 /* Using Tailwind CSS classes, so no scoped styles are needed here */
 progress::-webkit-progress-bar {
-  background-color: #e0e0e0;
-  border-radius: 9999px;
+  background-color: #475569; /* slate-600 */
 }
 
 progress::-webkit-progress-value {
-  background-color: #3b82f6; /* blue-500 */
-  border-radius: 9999px;
+  background-color: #818cf8; /* indigo-400 */
+  transition: width 0.2s ease;
 }
 
 progress::-moz-progress-bar {
-  background-color: #3b82f6; /* blue-500 */
-  border-radius: 9999px;
+  background-color: #818cf8; /* indigo-400 */
 }
 </style>
