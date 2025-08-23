@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "description": "A simple TOTP generator extension.",
   "permissions": [
-    "storage"
+    "storage",
+    "sidePanel"
   ],
   "action": {
     "default_popup": "index.html",
@@ -21,5 +22,8 @@
   },
   "background": {
     "service_worker": "src/background/background.ts"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
   }
 }

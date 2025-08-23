@@ -3,9 +3,11 @@ import TotpAuthenticator from '../shared/TotpAuthenticator.vue';
 </script>
 
 <template>
-  <TotpAuthenticator />
+  <div class="w-full min-h-screen bg-slate-900">
+    <TotpAuthenticator />
+  </div>
 </template>
 
 <style>
-/* Popup-specific styles if needed */
+/* Side panel-specific styles if needed */
 </style>
