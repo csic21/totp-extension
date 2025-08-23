@@ -98,7 +98,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full max-w-md bg-slate-800 p-4 font-sans text-white mx-auto">
+  <div class="w-full max-w-md bg-slate-800 p-4 font-sans text-white mx-auto rounded-xl">
     <h1 class="text-center text-xl font-bold text-slate-200 mb-4">TOTP Authenticator</h1>
 
     <div class="mb-4">
