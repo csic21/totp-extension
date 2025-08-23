@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { validateBase32Secret } from '../lib/totp';
 
 const emit = defineEmits(['add-account', 'close']);
 
@@ -12,6 +13,11 @@ const addAccount = () => {
 
   if (!name || !secret) {
     alert('Name and Secret cannot be empty.');
+    return;
+  }
+
+  if (!validateBase32Secret(secret)) {
+    alert('Invalid secret key format. Please enter a valid Base32 encoded secret.');
     return;
   }
 
