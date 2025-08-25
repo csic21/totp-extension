@@ -98,11 +98,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full max-w-md bg-slate-800 p-4 font-sans text-white mx-auto rounded-xl">
-    <h1 class="text-center text-xl font-bold text-slate-200 mb-4">TOTP Authenticator</h1>
+  <div class="w-full max-w-md bg-gray-900 p-4 font-sans text-white mx-auto rounded-xl">
+    <h1 class="text-center text-xl font-bold text-gray-200 mb-4">TOTP Authenticator</h1>
 
     <div class="mb-4">
-      <button @click="isModalOpen = true" class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-colors">
+      <button @click="isModalOpen = true" class="w-full bg-gray-700 text-white py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition-colors">
         Add New Account
       </button>
     </div>
@@ -110,20 +110,20 @@ onUnmounted(() => {
     <AddAccountModal v-if="isModalOpen" @add-account="handleAccountAdded" @close="isModalOpen = false" />
 
     <div class="space-y-3">
-      <h2 class="text-base font-semibold text-slate-400 mb-2">Your Accounts</h2>
-      <p v-if="Object.keys(accounts).length === 0" class="text-slate-400 text-center py-4">No accounts added yet.</p>
-      <div v-for="(_, name) in accounts" :key="name" class="bg-slate-700 p-3 rounded-lg shadow-md flex justify-between items-center">
+      <h2 class="text-base font-semibold text-gray-400 mb-2">Your Accounts</h2>
+      <p v-if="Object.keys(accounts).length === 0" class="text-gray-400 text-center py-4">No accounts added yet.</p>
+      <div v-for="(_, name) in accounts" :key="name" class="bg-gray-800 p-3 rounded-lg shadow-md flex justify-between items-center">
         <div class="flex-grow">
-          <h3 class="text-base font-medium text-slate-200 text-left">{{ name }}</h3>
+          <h3 class="text-base font-medium text-gray-200 text-left">{{ name }}</h3>
           <div class="flex items-center gap-2 mt-2">
-            <span class="text-2xl font-mono text-indigo-400 tracking-wider">{{ currentTokens[String(name)] || '...' }}</span>
+            <span class="text-2xl font-mono text-gray-300 tracking-wider">{{ currentTokens[String(name)] || '...' }}</span>
             <progress :value="remainingTimes[String(name)]" max="30" class="w-full h-1.5 rounded-full overflow-hidden"></progress>
-            <span class="text-xs text-slate-400 w-8 text-right">{{ remainingTimes[String(name)] }}s</span>
+            <span class="text-xs text-gray-400 w-8 text-right">{{ remainingTimes[String(name)] }}s</span>
           </div>
         </div>
         <div class="flex items-center gap-1 ml-3">
           <div class="relative">
-            <button @click="copyToClipboard(String(name), currentTokens[String(name)])" :disabled="!currentTokens[String(name)] || currentTokens[String(name)] === 'Error'" class="p-1 text-slate-400 rounded-full hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 transition-colors">
+            <button @click="copyToClipboard(String(name), currentTokens[String(name)])" :disabled="!currentTokens[String(name)] || currentTokens[String(name)] === 'Error'" class="p-1 text-gray-400 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
@@ -132,7 +132,7 @@ onUnmounted(() => {
               Copied!
             </span>
           </div>
-          <button @click="deleteAccount(String(name))" class="p-1 text-red-500 rounded-full hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-red-400 transition-colors">
+          <button @click="deleteAccount(String(name))" class="p-1 text-red-500 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-400 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -146,15 +146,15 @@ onUnmounted(() => {
 <style>
 /* Using Tailwind CSS classes, so no scoped styles are needed here */
 progress::-webkit-progress-bar {
-  background-color: #475569; /* slate-600 */
+  background-color: #757575; /* gray-600 */
 }
 
 progress::-webkit-progress-value {
-  background-color: #818cf8; /* indigo-400 */
+  background-color: #9e9e9e; /* gray-500 */
   transition: width 0.2s ease;
 }
 
 progress::-moz-progress-bar {
-  background-color: #818cf8; /* indigo-400 */
+  background-color: #9e9e9e; /* gray-500 */
 }
 </style>
