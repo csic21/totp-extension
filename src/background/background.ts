@@ -6,7 +6,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "openSidePanel",
     title: "Open TOTP Authenticator Side Panel",
-    contexts: ["action"] // Right-click on the extension icon
+    contexts: ["action"], // Right-click on the extension icon
   });
 });
 
@@ -21,11 +21,3 @@ chrome.contextMenus.onClicked.addListener((info, _tab) => {
     });
   }
 });
-
-// Handle clicks on the extension icon to open popup
-chrome.action.onClicked.addListener(() => {
-  // Popup will open automatically due to manifest configuration
-  console.log("Extension icon clicked - popup will open");
-});
-
-console.log('Background script loaded');
